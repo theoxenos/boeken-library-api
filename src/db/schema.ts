@@ -20,6 +20,7 @@ export const users = sqliteTable('users', {
 
 export const notes = sqliteTable('notes', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  bookId: integer('book_id').references(() => books.id).notNull(),
   userId: integer('user_id').references(() => users.id).notNull(),
   title: text('title').notNull(),
   content: text('content').notNull(),
