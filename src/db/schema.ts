@@ -1,11 +1,13 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import {InferInsertModel} from "drizzle-orm";
 
 export const books = sqliteTable('books', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   title: text('title').notNull(),
   author: text('author').notNull(),
   publishedYear: integer('published_year'),
-  isbn: text('isbn'),
+  isbn10: text('isbn10'),
+  isbn13: text('isbn13'),
   coverUrl: text('cover_url'),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
@@ -16,6 +18,8 @@ export const users = sqliteTable('users', {
   name: text('name').notNull(),
   email: text('email').notNull(),
   passwordHash: text('password_hash').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
 export const notes = sqliteTable('notes', {
