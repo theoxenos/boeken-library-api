@@ -1,0 +1,36 @@
+@baseUrl=http://localhost:3000/api/notes
+@authToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsImlhdCI6MTc4NDYzODQ0M30.44ry86B6JlUYcQqKbSxhwOh_Zy6BAkPzxzrZD4kb6GA
+
+### Get all notes for user
+GET {{baseUrl}}
+Authorization: Bearer {{authToken}}
+
+### Get note by ID
+GET {{baseUrl}}/1
+Authorization: Bearer {{authToken}}
+
+### Create note
+POST {{baseUrl}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "bookId": 1,
+  "title": "My first note",
+  "content": "This is a note about the book."
+}
+
+### Update note
+PUT {{baseUrl}}/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "bookId": 1,
+  "title": "My updated note",
+  "content": "This is an updated note about the book."
+}
+
+### Delete note
+DELETE {{baseUrl}}/1
+Authorization: Bearer {{authToken}}

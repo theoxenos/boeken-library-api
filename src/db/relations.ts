@@ -27,3 +27,17 @@ export const relations = defineRelations(schema, (r) =>({
         })
     },
 }));
+
+// export const relations = defineRelations(schema, (r) => (
+//     {
+//         parentTable: {
+//             children: r.many.childTable(),
+//         },
+//         childTable: {
+//             parent: r.one.parentTable({
+//                 from: r.childTable.parentId,
+//                 to: r.parentTable.id
+//             }),
+//         }
+//     }
+// ));

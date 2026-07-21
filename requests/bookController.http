@@ -1,0 +1,49 @@
+@baseUrl=http://localhost:3000/api/books
+@authToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsImlhdCI6MTc4NDYzODY0N30.jPYZi0asVMDdThX2ZQcbHItD-IQJCNNTTgLuPAiZaR8
+
+### Get all
+GET {{baseUrl}}
+Authorization: Bearer {{authToken}}
+
+### Get by ID
+GET {{baseUrl}}/1
+Authorization: Bearer {{authToken}}
+
+### Get notes for book
+GET {{baseUrl}}/1/notes
+Authorization: Bearer {{authToken}}
+
+### Get by ISBN
+GET {{baseUrl}}/isbn/0048231886
+Authorization: Bearer {{authToken}}
+
+### Create book
+POST {{baseUrl}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "The Hobbit",
+  "author": "J. R. R. Tolkien",
+  "publishedYear": 1981,
+  "isbn10": "0048231886",
+  "isbn13": "9780048231888",
+  "coverUrl": "https://covers.openlibrary.org/b/isbn/0048231886-L.jpg"
+}
+
+### Update book
+PUT {{baseUrl}}/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "The Great Gatsby",
+  "author": "F. Scott Fitzgerald",
+  "publishedYear": 1925
+}
+
+### Delete book
+DELETE {{baseUrl}}/1
+Authorization: Bearer {{authToken}}
+
+

@@ -5,6 +5,17 @@ import {z} from 'zod';
 import {books} from "../db/schema.ts";
 import {insertBookSchema, updateBookSchema} from "../schemas/databaseZodSchemas.ts";
 import {findBookByIsbn} from "../services/openLibraryService.ts";
+import {RequestWithUser} from "../types/index.ts";
+
+type BaseParams = Record<string, string>;
+
+interface IsbnParams extends BaseParams {
+    isbn: string;
+}
+
+interface IdParams extends BaseParams {
+    id: string;
+}
 
 export const getBooks = async (req: Request, res: Response) => {
     try {
@@ -50,12 +61,7 @@ export const getBookById = async (_req: Request, res: Response) => {
     }
 };
 
-type BaseParams = Record<string, string>;
-interface BookParams extends BaseParams {
-    isbn: string;
-}
-
-export const getBookByIsbn = async (req: Request<BookParams>, res: Response) => {
+export const getBookByIsbn = async (req: Request<IsbnParams>, res: Response) => {
     const isbn = req.params.isbn;
     if (!isbn) {
         res.status(400).json({message: 'ISBN is required'});
@@ -138,4 +144,22 @@ export const deleteBook = async (req: Request, res: Response) => {
         console.error('Error deleting book:', error);
         res.status(400).json({message: 'Error deleting book'});
     }
+};
+
+export const getAllNotesForBook = async (req: Request, res: Response) => {
+    const {user} = (req as RequestWithUser);
+    const {id} = (req as Request<IdParams>).params;
+
+    const notes = await db.query.notes.findMany({
+        where: {
+            AND: [
+                {userId: user.id},
+                {bookId: Number(id)}
+            ]
+        },
+        // with: {
+        //     book: true
+        // }
+    });
+    res.json(notes);
 };

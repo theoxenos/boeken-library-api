@@ -45,3 +45,13 @@ export const usersToBooks = sqliteTable('users_to_books', {
 export type BookInsertModel = InferInsertModel<typeof books>;
 export type UserSelectModel = InferSelectModel<typeof users>;
 
+// export const parentTable = sqliteTable('test_table', {
+//   id: integer('id').primaryKey({ autoIncrement: true }),
+//   name: text('name').notNull(),
+// });
+//
+// export const childTable = sqliteTable('test_advanced_table', {
+//   id: integer('id').primaryKey({ autoIncrement: true }),
+//   parentId: integer('test_table_id').references(() => parentTable.id).notNull(),
+//   name: text('name').notNull(),
+// });

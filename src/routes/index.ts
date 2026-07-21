@@ -1,10 +1,10 @@
 import {Router} from 'express';
 import bookRoutes from "./bookRoutes.ts";
-import authRoutes from "./authRoutes.ts";
+import noteRoutes from "./noteRoutes.ts";
 
 const router = Router();
 
-router.use('/auth', authRoutes);
 router.use('/books', bookRoutes);
+router.use('/notes', noteRoutes);
 
 export default router;

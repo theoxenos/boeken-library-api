@@ -5,13 +5,14 @@ import {
     getBookById,
     deleteBook,
     updateBook,
-    getBookByIsbn
+    getBookByIsbn, getAllNotesForBook
 } from '../controllers/bookController.ts';
 
 const router = Router();
 
 router.get('/', getBooks);
 router.get('/:id', getBookById);
+router.get('/:id/notes', getAllNotesForBook);
 router.get('/isbn/:isbn', getBookByIsbn);
 router.post('/', createBook);
 router.delete('/:id', deleteBook);
