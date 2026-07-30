@@ -1,16 +1,23 @@
 import {Request, Response} from "express";
 import {RequestWithUser} from "../types/index.ts";
 import {db} from "../db/index.ts";
-import {usersToBooks} from "../db/schema.ts";
-import {and, eq} from "drizzle-orm";
+import {books, usersToBooks} from "../db/schema.ts";
+import {and, eq, getColumns} from "drizzle-orm";
 
 export const addBookToUserLibrary = async (req: Request<object, object, { bookId: number }>, res: Response) => {
     const {user} = req as RequestWithUser;
     const {bookId} = req.body;
 
-    const isBookAlreadyInLibrary = await db.query.usersToBooks.findFirst({where: {bookId}});
+    const isBookAlreadyInLibrary = await db.query.usersToBooks.findFirst({
+        where: {
+            AND: [
+                {bookId},
+                {userId: user.id}
+            ]
+        }
+    });
     if (isBookAlreadyInLibrary) {
-        return res.status(409).send({message: "Book already in Library"});
+        return res.status(409).send({message: "Book already in library"});
     }
 
     const newEntry = await db.insert(usersToBooks).values({
@@ -21,7 +28,29 @@ export const addBookToUserLibrary = async (req: Request<object, object, { bookId
         }
     ).returning();
 
-    return res.status(201).send(newEntry);
+    return res.status(201).json(newEntry);
+};
+
+export const getBooksFromUserLibrary = async (req: Request, res: Response) => {
+    const {user} = req as RequestWithUser;
+
+    const {author, publishedYear, title, coverUrl} = getColumns(books);
+
+    const selectColumns = {
+        author: author,
+        publishedYear: publishedYear,
+        title: title,
+        status: usersToBooks.status,
+        bookId: usersToBooks.bookId,
+        coverUrl: coverUrl,
+        createdAt: usersToBooks.createdAt,
+        updatedAt: usersToBooks.updatedAt
+    };
+
+    const result = await db.select(selectColumns).from(usersToBooks)
+        .where(eq(usersToBooks.userId, user.id)).leftJoin(books, eq(usersToBooks.bookId, books.id));
+
+    return res.status(200).json(result);
 };
 
 export const removeBookFromUserLibrary = async (req: Request, res: Response) => {
@@ -33,11 +62,11 @@ export const removeBookFromUserLibrary = async (req: Request, res: Response) => 
             eq(usersToBooks.bookId, Number(bookId)),
             eq(usersToBooks.userId, user.id)
         )
-    );
+    ).returning();
 
-    if (!deletedBook) {
-        return res.status(404).send({message: "Book not found"});
+    if (deletedBook.length === 0) {
+        return res.status(404).json({message: "Book not found in library"});
     }
 
-    return res.status(204).send({message: "Book removed from Library"});
+    return res.status(200).json({message: "Book removed from library"});
 };
