@@ -1,8 +1,8 @@
 import type {Request, Response} from 'express';
 import {db} from '../db/index.ts';
-import {eq, TableFilter} from "drizzle-orm";
+import {eq, sql, TableFilter} from "drizzle-orm";
 import {z} from 'zod';
-import {books} from "../db/schema.ts";
+import {books, usersToBooks} from "../db/schema.ts";
 import {insertBookSchema, updateBookSchema} from "../schemas/databaseZodSchemas.ts";
 import {findBookByIsbn} from "../services/openLibraryService.ts";
 import {RequestWithUser} from "../types/index.ts";
@@ -19,6 +19,7 @@ interface IdParams extends BaseParams {
 
 export const getBooks = async (req: Request, res: Response) => {
     try {
+        const {user} = req as RequestWithUser;
         const {title, isbn, author} = req.query;
 
         const conditions: TableFilter<typeof books>[] = [];
@@ -32,13 +33,23 @@ export const getBooks = async (req: Request, res: Response) => {
             conditions.push({OR: [{isbn10: isbn}, {isbn13: isbn}]});
         }
 
-        const allBooks = await (conditions.length > 0
-            ? db.query.books.findMany({
-                where: {
-                    AND: conditions
-                }
-            })
-            : db.select().from(books));
+        const allBooks = await db.query.books.findMany({
+            extras: {
+                isInLibrary: (b) => sql<boolean>`
+                  EXISTS (
+                    SELECT 1 FROM ${usersToBooks}
+                    WHERE ${usersToBooks.bookId} = ${b.id}
+                    AND ${usersToBooks.userId} = ${user.id}
+                  )
+                `.mapWith(Boolean),
+            },
+            where: {
+                AND: conditions
+            },
+            orderBy: {
+                title: 'asc'
+            }
+        });
 
         res.json(allBooks);
     } catch (error) {
@@ -47,17 +58,32 @@ export const getBooks = async (req: Request, res: Response) => {
     }
 };
 
-export const getBookById = async (_req: Request, res: Response) => {
+export const getBookById = async (req: Request, res: Response) => {
     try {
-        const book = await db.select().from(books).where(eq(books.id, Number(_req.params.id))).limit(1);
-        if (book.length === 0) {
-            res.status(404).json({message: 'Book not found'});
-        } else {
-            res.json(book);
+        const {user} = req as RequestWithUser;
+
+        const book = await db.query.books.findFirst({
+            where: {
+                id: Number(req.params.id)
+            },
+            extras: {
+                isInLibrary: (b) => sql<boolean>`
+                  EXISTS (
+                    SELECT 1 FROM ${usersToBooks}
+                    WHERE ${usersToBooks.bookId} = ${b.id}
+                    AND ${usersToBooks.userId} = ${user.id}
+                  )
+                `.mapWith(Boolean),
+            },
+        });
+        if (book === null) {
+            return res.status(404).json({message: 'Book not found'});
         }
+
+        return res.json(book);
     } catch (error) {
         console.error('Error fetching book:', error);
-        res.status(500).json({message: 'Error fetching book'});
+        return res.status(500).json({message: 'Error fetching book'});
     }
 };
 
