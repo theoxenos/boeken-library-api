@@ -4,7 +4,7 @@ import {BookInsertModel} from "../db/schema.ts";
 const client = new OpenLibraryClient({
     timeout: 15000,
     headers: {
-        "User-Agent": "OpenLibrary-Example/1.0.0",
+        "User-Agent": "WebDev-Learn-Project/1.0.0",
     },
 });
 
