@@ -26,6 +26,12 @@ export const relations = defineRelations(schema, (r) =>({
             to: r.books.id
         })
     },
+    usersToBooks: {
+        book: r.one.books({
+            from: r.usersToBooks.userId,
+            to: r.books.id
+        })
+    }
 }));
 
 // export const relations = defineRelations(schema, (r) => (
