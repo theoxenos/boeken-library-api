@@ -1,7 +1,4 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import Database from 'better-sqlite3';
-import * as schema from './schema.ts';
-import { relations } from './relations.ts';
+import { drizzle } from 'drizzle-orm/libsql';
+import {relations} from "./relations.ts";
 
-const sqlite = new Database('sqlite.db');
-export const db = drizzle({ client: sqlite, schema, relations, logger: true });
+export const db = drizzle(process.env.DATABASE_URL!, {logger: true, relations});
