@@ -1,0 +1,1 @@
+ALTER TABLE `users_to_books` ADD `rating` integer DEFAULT 0;

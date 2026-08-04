@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
 import {InferInsertModel, InferSelectModel} from "drizzle-orm";
 
 export const books = sqliteTable('books', {
@@ -36,6 +36,7 @@ export const usersToBooks = sqliteTable('users_to_books', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   userId: integer('user_id').references(() => users.id).notNull(),
   bookId: integer('book_id').references(() => books.id).notNull(),
+  rating: real('rating').default(0).notNull(),
   status: text('status', {enum: ['reading', 'to-read', 'completed']}).notNull().default('to-read'),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
