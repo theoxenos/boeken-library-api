@@ -15,4 +15,4 @@ export const selectUserSchema = createSelectSchema(users);
 export const updateUserSchema = createUpdateSchema(users).omit(omittedFields);
 export const insertUserToBookSchema = createInsertSchema(usersToBooks);
 export const selectUserToBookSchema = createSelectSchema(usersToBooks);
-export const updateUserToBookSchema = createUpdateSchema(usersToBooks);
+export const updateUserToBookSchema = createUpdateSchema(usersToBooks).omit({...omittedFieldsWithUserId, bookId: true});

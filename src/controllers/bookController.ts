@@ -1,6 +1,6 @@
 import type {Request, Response} from 'express';
 import {db} from '../db/index.ts';
-import {eq, sql, TableFilter} from "drizzle-orm";
+import {and, eq, getColumns, like, or, sql, SQL} from "drizzle-orm";
 import {z} from 'zod';
 import {books, usersToBooks} from "../db/schema.ts";
 import {insertBookSchema, updateBookSchema} from "../schemas/databaseZodSchemas.ts";
@@ -22,34 +22,46 @@ export const getBooks = async (req: Request, res: Response) => {
         const {user} = req as RequestWithUser;
         const {title, isbn, author} = req.query;
 
-        const conditions: TableFilter<typeof books>[] = [];
+        const conditions: SQL[] = [];
         if (title && typeof title === 'string') {
-            conditions.push({title: {like: `%${title}%`}});
+            conditions.push(like(books.title, `%${title}%`));
         }
         if (author && typeof author === 'string') {
-            conditions.push({author: {like: `%${author}%`}});
+            conditions.push(like(books.author, `%${author}%`));
         }
         if (isbn && typeof isbn === 'string') {
-            conditions.push({OR: [{isbn10: isbn}, {isbn13: isbn}]});
+            conditions.push(or(eq(books.isbn10, isbn), eq(books.isbn13, isbn))!);
         }
 
-        const allBooks = await db.query.books.findMany({
-            extras: {
-                isInLibrary: (b) => sql<boolean>`
-                  EXISTS (
-                    SELECT 1 FROM ${usersToBooks}
-                    WHERE ${usersToBooks.bookId} = ${b.id}
-                    AND ${usersToBooks.userId} = ${user.id}
-                  )
-                `.mapWith(Boolean),
-            },
-            where: {
-                AND: conditions
-            },
-            orderBy: {
-                title: 'asc'
-            }
-        });
+        const avgSubquery = db
+            .select({
+                bookId: usersToBooks.bookId,
+                averageRating: sql<number>`avg(
+                    ${usersToBooks.rating}
+                )`.as('average_rating'),
+            })
+            .from(usersToBooks)
+            .groupBy(usersToBooks.bookId)
+            .as('avg_ratings');
+
+        const allBooks = await db
+            .select({
+                ...getColumns(books),
+                userRating: usersToBooks.rating,
+                status: usersToBooks.status,
+                // Overall average rating for the book from all users
+                averageRating: sql<number>`${avgSubquery.averageRating}`,
+            })
+            .from(books)
+            // Left join to get the specific user's interaction/rating with the book
+            .leftJoin(
+                usersToBooks,
+                and(eq(usersToBooks.bookId, books.id), eq(usersToBooks.userId, user.id))
+            )
+            // Left join the aggregation subquery to get the global average rating
+            .leftJoin(avgSubquery, eq(avgSubquery.bookId, books.id))
+            .where(and(...conditions))
+            .orderBy(books.title);
 
         res.json(allBooks);
     } catch (error) {
@@ -62,20 +74,28 @@ export const getBookById = async (req: Request, res: Response) => {
     try {
         const {user} = req as RequestWithUser;
 
-        const book = await db.query.books.findFirst({
-            where: {
-                id: Number(req.params.id)
-            },
-            extras: {
-                isInLibrary: (b) => sql<boolean>`
-                  EXISTS (
-                    SELECT 1 FROM ${usersToBooks}
-                    WHERE ${usersToBooks.bookId} = ${b.id}
-                    AND ${usersToBooks.userId} = ${user.id}
-                  )
-                `.mapWith(Boolean),
-            },
-        });
+        const avgSubquery = db
+            .select({
+                bookId: usersToBooks.bookId,
+                averageRating: sql<number>`avg(
+                    ${usersToBooks.rating}
+                )`.as('average_rating'),
+            })
+            .from(usersToBooks)
+            .groupBy(usersToBooks.bookId)
+            .as('avg_ratings');
+
+        const book = await db.select({
+            ...getColumns(books),
+            rating: usersToBooks.rating,
+            status: usersToBooks.status,
+            averageRating: avgSubquery.averageRating
+        })
+            .from(books)
+            .leftJoin(usersToBooks, and(eq(usersToBooks.bookId, books.id), eq(usersToBooks.userId, user.id)))
+            .leftJoin(avgSubquery, eq(avgSubquery.bookId, books.id))
+            .where(eq(books.id, Number(req.params.id)));
+
         if (book === null) {
             return res.status(404).json({message: 'Book not found'});
         }

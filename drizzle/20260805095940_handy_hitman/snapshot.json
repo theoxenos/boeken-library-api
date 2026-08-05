@@ -1,9 +1,9 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "a371099b-9d3d-4383-8f4b-d14eb5a7b71d",
+  "id": "e59591da-0d8b-4a2b-ba4c-2b8b9f60e519",
   "prevIds": [
-    "90aa3d9f-34b0-4548-a6c3-023d93234fe3"
+    "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
     {
@@ -63,6 +63,36 @@
       "table": "books"
     },
     {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "isbn10",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "isbn13",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "cover_url",
+      "entityType": "columns",
+      "table": "books"
+    },
+    {
       "type": "integer",
       "notNull": false,
       "autoincrement": false,
@@ -94,7 +124,17 @@
     },
     {
       "type": "integer",
-      "notNull": false,
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "book_id",
+      "entityType": "columns",
+      "table": "notes"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
       "autoincrement": false,
       "default": null,
       "generated": null,
@@ -188,9 +228,9 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
-      "name": "user_id",
+      "name": "created_at",
       "entityType": "columns",
-      "table": "users_to_books"
+      "table": "users"
     },
     {
       "type": "integer",
@@ -198,7 +238,47 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "users"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": true,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "users_to_books"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "user_id",
+      "entityType": "columns",
+      "table": "users_to_books"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
       "name": "book_id",
+      "entityType": "columns",
+      "table": "users_to_books"
+    },
+    {
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "rating",
       "entityType": "columns",
       "table": "users_to_books"
     },
@@ -231,6 +311,21 @@
       "name": "updated_at",
       "entityType": "columns",
       "table": "users_to_books"
+    },
+    {
+      "columns": [
+        "book_id"
+      ],
+      "tableTo": "books",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "nameExplicit": false,
+      "name": "fk_notes_book_id_books_id_fk",
+      "entityType": "fks",
+      "table": "notes"
     },
     {
       "columns": [
@@ -303,6 +398,33 @@
       "name": "users_pk",
       "table": "users",
       "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "users_to_books_pk",
+      "table": "users_to_books",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false
+        },
+        {
+          "value": "book_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "users_to_books_user_id_book_id_unique",
+      "entityType": "indexes",
+      "table": "users_to_books"
     }
   ],
   "renames": []
