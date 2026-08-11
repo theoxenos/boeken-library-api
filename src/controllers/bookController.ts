@@ -96,11 +96,11 @@ export const getBookById = async (req: Request, res: Response) => {
             .leftJoin(avgSubquery, eq(avgSubquery.bookId, books.id))
             .where(eq(books.id, Number(req.params.id)));
 
-        if (book === null) {
+        if (book.length === 0) {
             return res.status(404).json({message: 'Book not found'});
         }
 
-        return res.json(book);
+        return res.json(book[0]);
     } catch (error) {
         console.error('Error fetching book:', error);
         return res.status(500).json({message: 'Error fetching book'});
@@ -203,6 +203,7 @@ export const getAllNotesForBook = async (req: Request, res: Response) => {
                 {bookId: Number(id)}
             ]
         },
+        orderBy: {createdAt: 'desc', title: 'asc'},
         // with: {
         //     book: true
         // }
