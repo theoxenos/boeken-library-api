@@ -1,8 +1,8 @@
 import type {Request, Response} from 'express';
 import {db} from '../db/index.ts';
-import {and, eq, getColumns, like, or, sql, SQL} from "drizzle-orm";
+import {and, asc, desc, eq, getColumns, like, or, sql, SQL, type AnyColumn} from "drizzle-orm";
 import {z} from 'zod';
-import {books, usersToBooks} from "../db/schema.ts";
+import {books, users, usersToBooks} from "../db/schema.ts";
 import {insertBookSchema, updateBookSchema} from "../schemas/databaseZodSchemas.ts";
 import {findBookByIsbn} from "../services/openLibraryService.ts";
 import {RequestWithUser} from "../types/index.ts";
@@ -17,20 +17,43 @@ interface IdParams extends BaseParams {
     id: string;
 }
 
-export const getBooks = async (req: Request, res: Response) => {
+type GetBooksParams = BaseParams & {
+    title?: string;
+    isbn?: string;
+    author?: string;
+    sortBy?: string;
+    sortOrder?: string;
+}
+
+const getSortOrder = (sortBy?: string, sortOrder?: string) => {
+    if (!sortBy || !sortOrder) {
+        return asc(books.title);
+    }
+
+    if (sortBy === 'averageRating') {
+        const column = sql`average_rating`;
+        return sortOrder === 'asc' ? asc(sql`average_rating`) : desc(column);
+    }
+
+    const cols: Record<string, AnyColumn> = getColumns(books);
+    const column = cols[sortBy];
+    return sortOrder === 'asc' ? asc(column) : desc(column);
+}
+
+export const getBooks = async (req: Request<object, object, object, GetBooksParams>, res: Response) => {
     try {
         const {user} = req as RequestWithUser;
-        const {title, isbn, author} = req.query;
+        const {title, isbn, author, sortBy, sortOrder} = req.query;
 
-        const conditions: SQL[] = [];
-        if (title && typeof title === 'string') {
-            conditions.push(like(books.title, `%${title}%`));
+        const filterConditions: SQL[] = [];
+        if (title) {
+            filterConditions.push(like(books.title, `%${title}%`));
         }
-        if (author && typeof author === 'string') {
-            conditions.push(like(books.author, `%${author}%`));
+        if (author) {
+            filterConditions.push(like(books.author, `%${author}%`));
         }
-        if (isbn && typeof isbn === 'string') {
-            conditions.push(or(eq(books.isbn10, isbn), eq(books.isbn13, isbn))!);
+        if (isbn) {
+            filterConditions.push(or(eq(books.isbn10, isbn), eq(books.isbn13, isbn))!);
         }
 
         const avgSubquery = db
@@ -60,8 +83,8 @@ export const getBooks = async (req: Request, res: Response) => {
             )
             // Left join the aggregation subquery to get the global average rating
             .leftJoin(avgSubquery, eq(avgSubquery.bookId, books.id))
-            .where(and(...conditions))
-            .orderBy(books.title);
+            .where(and(...filterConditions))
+            .orderBy(getSortOrder(sortBy, sortOrder));
 
         res.json(allBooks);
     } catch (error) {
@@ -78,7 +101,7 @@ export const getBookById = async (req: Request, res: Response) => {
             .select({
                 bookId: usersToBooks.bookId,
                 averageRating: sql<number>`avg(
-                    ${usersToBooks.rating}
+                ${usersToBooks.rating}
                 )`.as('average_rating'),
             })
             .from(usersToBooks)
