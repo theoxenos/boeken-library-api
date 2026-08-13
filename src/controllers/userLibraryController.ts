@@ -2,7 +2,7 @@ import {Request, Response} from "express";
 import {RequestWithUser} from "../types/index.ts";
 import {db} from "../db/index.ts";
 import {books, usersToBooks} from "../db/schema.ts";
-import {and, eq, getColumns} from "drizzle-orm";
+import {and, eq, getColumns, like} from "drizzle-orm";
 import {updateUserToBookSchema} from "../schemas/databaseZodSchemas.ts";
 import {z} from "zod";
 
@@ -34,6 +34,7 @@ export const addBookToUserLibrary = async (req: Request<object, object, { bookId
 };
 
 export const getBooksFromUserLibrary = async (req: Request, res: Response) => {
+    const {title: titleQuery} = req.query;
     const {user} = req as RequestWithUser;
 
     const {author, publishedYear, title, coverUrl} = getColumns(books);
@@ -49,8 +50,16 @@ export const getBooksFromUserLibrary = async (req: Request, res: Response) => {
         updatedAt: usersToBooks.updatedAt
     };
 
-    const result = await db.select(selectColumns).from(usersToBooks)
-        .where(eq(usersToBooks.userId, user.id)).leftJoin(books, eq(usersToBooks.bookId, books.id));
+    const titleFilter =
+        titleQuery && typeof titleQuery === "string"
+            ? like(books.title, `%${titleQuery}%`)
+            : undefined;
+
+    const result = await db
+        .select(selectColumns)
+        .from(usersToBooks)
+        .leftJoin(books, eq(usersToBooks.bookId, books.id))
+        .where(and(eq(usersToBooks.userId, user.id), titleFilter));
 
     return res.status(200).json(result);
 };
