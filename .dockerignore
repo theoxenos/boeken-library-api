@@ -1,0 +1,66 @@
+# Git
+.git
+.gitignore
+
+# Dependencies
+node_modules
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs
+
+# Test files
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+
+# Documentation
+docs
+README.md
+*.md
+
+# HTTP request files
+requests
+
+# Development files
+test.js
+seedData.ts
+
+# ESLint
+eslint.config.mjs
+
+# Build artifacts (if any)
+dist
+build
+
+# Drizzle migrations (keep in image if needed for deployment)
+# drizzle
+
+# SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+docker-compose*.yml
+Dockerfile*
