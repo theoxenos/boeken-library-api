@@ -1,4 +1,6 @@
 ﻿FROM node:lts AS build
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
 WORKDIR /app
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
@@ -16,7 +18,7 @@ COPY package*.json ./
 RUN npm ci --legacy-peer-deps --omit=dev
 
 COPY --chown=node:node --from=migrate /app/sqlite.db /app/
-COPY --chown=node:node --from=migrate /app/dist /app/
+COPY --chown=node:node --from=migrate /app/dist/ /app/
 
 USER node
-CMD ["node", "dist/index.js"]
+CMD ["node", "index.js"]

@@ -1,7 +1,9 @@
 services:
   api:
     image: boeken-library-api
-    build: .
-    ports:
-      - "3000:3000"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DATABASE_URL: ${DATABASE_URL}
     env_file: .env
