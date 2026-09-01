@@ -2,7 +2,7 @@ import type {Request, Response} from 'express';
 import {db} from '../db/index.ts';
 import {and, asc, desc, eq, getColumns, like, or, sql, SQL, type AnyColumn} from "drizzle-orm";
 import {z} from 'zod';
-import {books, users, usersToBooks} from "../db/schema.ts";
+import {books, usersToBooks} from "../db/schema.ts";
 import {insertBookSchema, updateBookSchema} from "../schemas/databaseZodSchemas.ts";
 import {findBookByIsbn} from "../services/openLibraryService.ts";
 import {RequestWithUser} from "../types/index.ts";
@@ -60,7 +60,7 @@ export const getBooks = async (req: Request<object, object, object, GetBooksPara
             .select({
                 bookId: usersToBooks.bookId,
                 averageRating: sql<number>`avg(
-                    ${usersToBooks.rating}
+                ${usersToBooks.rating}
                 )`.as('average_rating'),
             })
             .from(usersToBooks)
@@ -227,9 +227,6 @@ export const getAllNotesForBook = async (req: Request, res: Response) => {
             ]
         },
         orderBy: {createdAt: 'desc', title: 'asc'},
-        // with: {
-        //     book: true
-        // }
     });
     res.json(notes);
 };
