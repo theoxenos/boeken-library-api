@@ -9,6 +9,14 @@ Authorization: Bearer {{authToken}}
 GET {{baseUrl}}/1
 Authorization: Bearer {{authToken}}
 
+### Get by title
+GET {{baseUrl}}?title=iliad
+Authorization: Bearer {{authToken}}
+
+### Get by isbn
+GET {{baseUrl}}?isbn=
+Authorization: Bearer {{authToken}}
+
 ### Get notes for book
 GET {{baseUrl}}/1/notes
 Authorization: Bearer {{authToken}}
@@ -41,6 +49,9 @@ Content-Type: application/json
   "author": "F. Scott Fitzgerald",
   "publishedYear": 1925
 }
+
+### Update rating
+
 
 ### Delete book
 DELETE {{baseUrl}}/1

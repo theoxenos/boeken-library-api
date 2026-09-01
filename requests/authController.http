@@ -18,3 +18,7 @@ Content-Type: application/json
   "email": "test@test.com",
   "password": "test123"
 }
+
+### /me
+GET {{baseUrl}}/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsImlhdCI6MTc4ODE2NTU2OH0.YKx1hjw3NJcOJnVXGoQMErU_8UgsGHVDVcVJrdVVj1Q

@@ -1,0 +1,53 @@
+@baseUrl=http://localhost:3000/api/library
+@authToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsImlhdCI6MTc4NDYzODY0N30.jPYZi0asVMDdThX2ZQcbHItD-IQJCNNTTgLuPAiZaR8
+@authToken2=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImVtYWlsIjoicGlrYWNodUBwb2tlbW9uLmNvbSIsImlhdCI6MTc4NDYzODY0N30.8GKdkjbvA7ep4CxEr9o8Jw70borgGKDvnHs3qtUgGw8
+
+### Get all
+GET {{baseUrl}}
+Authorization: Bearer {{authToken}}
+
+### Add book to library
+POST {{baseUrl}}
+Authorization: Bearer {{authToken2}}
+Content-Type: application/json
+
+{
+  "bookId": 1
+}
+
+### Update book data in library
+PUT {{baseUrl}}/3
+Authorization: Bearer {{authToken2}}
+Content-Type: application/json
+
+{
+  "rating": 5
+}
+
+### Update book data in library
+PUT {{baseUrl}}/3
+Authorization: Bearer {{authToken2}}
+Content-Type: application/json
+
+{
+  "rating": 4
+}
+
+### Update book data in library
+PUT {{baseUrl}}/3
+Authorization: Bearer {{authToken2}}
+Content-Type: application/json
+
+{
+  "status": "completed"
+}
+
+### Update book data in library
+PUT {{baseUrl}}/4
+Authorization: Bearer {{authToken2}}
+Content-Type: application/json
+
+{
+  "rating": 5,
+  "status": null
+}
