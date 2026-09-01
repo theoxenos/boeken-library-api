@@ -6,6 +6,7 @@ import {z} from "zod";
 import {db} from "../db/index.ts";
 import {hashSecret, jwtSecret} from "../config/index.ts";
 import {users} from "../db/schema.ts";
+import {RequestWithUser} from "../types/index.ts";
 
 const userLoginSchema = z.object({
     email: z.email(),
@@ -66,4 +67,9 @@ export const register = async (req: Request, res: Response) => {
     const passwordHash = await argon2.hash(password, {secret: Buffer.from(hashSecret)});
     await db.insert(users).values({email, passwordHash, name});
     res.status(204).end();
+};
+
+export const me = (req: Request, res: Response) => {
+    const {user} = req as RequestWithUser;
+    res.json({email: user.email, name: user.name});
 };
