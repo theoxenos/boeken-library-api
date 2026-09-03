@@ -22,7 +22,13 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         return;
     }
 
-    const decoded = jwt.verify(token, jwtSecret) as JwtPayload;
+    let decoded: JwtPayload;
+    try {
+        decoded = jwt.verify(token, jwtSecret) as JwtPayload;
+    } catch (error) {
+        res.status(401).json({error: 'Invalid token'});
+        return;
+    }
 
     const user = await db.query.users.findFirst({where: {id: Number(decoded.userId)}});
     if (!user) {
